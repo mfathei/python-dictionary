@@ -1,5 +1,9 @@
 from tkinter import *
+import tkinter.messagebox as mb
 import sqlite3
+
+def aboutApp():
+    mb.showinfo("About", "Dictionary 1.0 2017")
 
 def connectDB():
     try:
@@ -44,7 +48,7 @@ value.pack(side=LEFT, padx = 4, pady = 1, ipady = 4)
 trans = Button(topFrame, text="Translate ترجم", command=translate)
 trans.pack(side=LEFT, padx=4, pady = 1)
 
-about = Button(topFrame, text="About عن البرنامج")
+about = Button(topFrame, text="About عن البرنامج", command=aboutApp)
 about.pack(side=LEFT, padx=4, pady = 1)
 
 exit = Button(topFrame, text="Exit خــروج", command=mainWindow.quit)
