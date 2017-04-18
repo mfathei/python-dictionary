@@ -1,4 +1,31 @@
 from tkinter import *
+import sqlite3
+
+def connectDB():
+    try:
+        myconnection = sqlite3.connect('sqlite_test.db3')
+        return myconnection
+    except sqlite3.Error as e:
+        print("Database Error: ", e.args[0])
+        return
+
+def translate():
+    resultset = []
+    enText = ""
+    arText = ""
+    try:
+        cursor = conn.cursor()
+        cursor.execute("select * from results limit 100")
+        resultset = cursor.fetchall()
+        for row in resultset:
+            enText += " " + row[1] 
+            arText += " " + row[1] 
+        
+        enValues.set(enText)
+        arValues.set(arText)
+    except sqlite3.Error as e:
+        print("Database Error: ", e.args[0])
+        return
 
 mainWindow = Tk()
 mainWindow.title("Dictionary")
@@ -14,7 +41,7 @@ topFrame.pack(side=TOP, fill=X)
 value = Entry(topFrame , width=52, bd=3)
 value.pack(side=LEFT, padx = 4, pady = 1, ipady = 4)
 
-trans = Button(topFrame, text="Translate ترجم")
+trans = Button(topFrame, text="Translate ترجم", command=translate)
 trans.pack(side=LEFT, padx=4, pady = 1)
 
 about = Button(topFrame, text="About عن البرنامج")
@@ -28,11 +55,24 @@ exit.pack(side=LEFT, padx=4, pady = 1)
 bottomFrame = Frame(mainWindow, bd=1, relief=GROOVE, padx=4, pady=4)
 bottomFrame.pack(side=BOTTOM, fill=BOTH)
 
-en = Listbox(bottomFrame, width = 48, height=50, bd=3, relief=SUNKEN)
+""" --------------------------- """
+enValues = StringVar()
+en = Listbox(bottomFrame, width = 48, height=50, bd=3, listvariable=enValues)
 en.pack(side=LEFT, fill=Y)
 
-ar = Listbox(bottomFrame, width = 48, height=50, bd=3, relief=SUNKEN)
+enValues.set("test test2 test3")
+
+arValues = StringVar()
+ar = Listbox(bottomFrame, width = 48, height=50, bd=3, justify=RIGHT, listvariable=arValues)
 ar.pack(side=RIGHT, fill=Y)
+
+arValues.set("محمد أحمد علي")
+
+enValues.set("\"test test2\" test3")
+
+""" --------------------------- """
+
+conn = connectDB()
 
 mainWindow.mainloop()
 
