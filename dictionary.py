@@ -2,12 +2,22 @@ from tkinter import *
 import tkinter.messagebox as mb
 import sqlite3
 
+mainWindow = Tk()
+mainWindow.title("Dictionary")
+mainWindow.maxsize(600 , 250)
+mainWindow.minsize(600 , 250)
+mainWindow.resizable(False, False)
+
+""" ---------------------------- """
+
+wordTranslate = StringVar()
+
 def aboutApp():
     mb.showinfo("About", "Dictionary 1.0 2017")
 
 def connectDB():
     try:
-        myconnection = sqlite3.connect('sqlite_test.db3')
+        myconnection = sqlite3.connect('lib/Dic_data.db3')
         return myconnection
     except sqlite3.Error as e:
         print("Database Error: ", e.args[0])
@@ -19,11 +29,12 @@ def translate():
     arText = ""
     try:
         cursor = conn.cursor()
-        cursor.execute("select * from results limit 100")
+        cursor.execute("select distinct en,ar from word where en='"+ wordTranslate.get().upper() +"' or ar='"+ wordTranslate.get().upper() +"' ")
         resultset = cursor.fetchall()
+        #print("select en,ar from word where en='"+ wordTranslate.get().upper() +"' or ar='"+ wordTranslate.get().upper() +"' ")
         for row in resultset:
-            enText += " " + row[1] 
-            arText += " " + row[1] 
+            enText += "\"" + row[0] + "\"\n"
+            arText += "\"" + row[1] + "\"\n"
         
         enValues.set(enText)
         arValues.set(arText)
@@ -31,18 +42,11 @@ def translate():
         print("Database Error: ", e.args[0])
         return
 
-mainWindow = Tk()
-mainWindow.title("Dictionary")
-mainWindow.maxsize(600 , 250)
-mainWindow.minsize(600 , 250)
-mainWindow.resizable(False, False)
-
-""" ---------------------------- """
 
 topFrame = Frame(mainWindow, bd=1, relief=GROOVE, padx=2, pady=4)
 topFrame.pack(side=TOP, fill=X)
 
-value = Entry(topFrame , width=52, bd=3)
+value = Entry(topFrame , width=52, bd=3 ,textvariable=wordTranslate)
 value.pack(side=LEFT, padx = 4, pady = 1, ipady = 4)
 
 trans = Button(topFrame, text="Translate ترجم", command=translate)
@@ -64,19 +68,12 @@ enValues = StringVar()
 en = Listbox(bottomFrame, width = 48, height=50, bd=3, listvariable=enValues)
 en.pack(side=LEFT, fill=Y)
 
-enValues.set("test test2 test3")
-
 arValues = StringVar()
 ar = Listbox(bottomFrame, width = 48, height=50, bd=3, justify=RIGHT, listvariable=arValues)
 ar.pack(side=RIGHT, fill=Y)
-
-arValues.set("محمد أحمد علي")
-
-enValues.set("\"test test2\" test3")
 
 """ --------------------------- """
 
 conn = connectDB()
 
 mainWindow.mainloop()
-
