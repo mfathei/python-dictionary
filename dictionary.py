@@ -1,79 +1,75 @@
-from tkinter import *
+import tkinter as tk
 import tkinter.messagebox as mb
 import sqlite3
 
-mainWindow = Tk()
-mainWindow.title("Dictionary")
-mainWindow.maxsize(600 , 250)
-mainWindow.minsize(600 , 250)
-mainWindow.resizable(False, False)
 
-""" ---------------------------- """
+class Application(tk.Frame):
 
-wordTranslate = StringVar()
-
-def aboutApp():
-    mb.showinfo("About", "Dictionary 1.0 2017")
-
-def connectDB():
-    try:
-        myconnection = sqlite3.connect('lib/Dic_data.db3')
-        return myconnection
-    except sqlite3.Error as e:
-        print("Database Error: ", e.args[0])
-        return
-
-def translate():
-    resultset = []
-    enText = ""
-    arText = ""
-    try:
-        cursor = conn.cursor()
-        cursor.execute("select distinct en,ar from word where en='"+ wordTranslate.get().upper() +"' or ar='"+ wordTranslate.get().upper() +"' ")
-        resultset = cursor.fetchall()
-        #print("select en,ar from word where en='"+ wordTranslate.get().upper() +"' or ar='"+ wordTranslate.get().upper() +"' ")
-        for row in resultset:
-            enText += "\"" + row[0] + "\"\n"
-            arText += "\"" + row[1] + "\"\n"
+    def __init__(self, master=None):
+        super().__init__(master)
         
-        enValues.set(enText)
-        arValues.set(arText)
-    except sqlite3.Error as e:
-        print("Database Error: ", e.args[0])
-        return
+        self.wordTranslate = tk.StringVar()
+        self.englishList = tk.StringVar()
+        self.arabicList = tk.StringVar()
+        self.createForm()
+        self.dbs = self.getDatabaseConnection()
+    
+    def createForm(self):
+        toolbar = tk.Frame(root, bd=1, relief=tk.GROOVE, padx=2, pady=4)
+        toolbar.pack(side=tk.TOP, fill=tk.X)
 
+        txt = tk.Entry(toolbar , width=42, bd=3 ,textvariable=self.wordTranslate)
+        txt.pack(side=tk.RIGHT, padx = 4, pady = 1, ipady = 4)
 
-topFrame = Frame(mainWindow, bd=1, relief=GROOVE, padx=2, pady=4)
-topFrame.pack(side=TOP, fill=X)
+        translate = tk.Button(toolbar,width = 20, text="ترجم", command=self.translateWords)
+        translate.pack(side=tk.RIGHT, padx=4, pady = 1)
 
-value = Entry(topFrame , width=52, bd=3 ,textvariable=wordTranslate)
-value.pack(side=LEFT, padx = 4, pady = 1, ipady = 4)
+        exit = tk.Button(toolbar, width = 25,text="اغـــلاق", command=self.master.quit)
+        exit.pack(side=tk.RIGHT, padx=4, pady = 1)
+        # ===========================================
+        contents = tk.Frame(root, bd=1, relief=tk.GROOVE, padx=4, pady=4)
+        contents.pack(side=tk.BOTTOM, fill=tk.BOTH)
+        # ===========================================
+        enList = tk.Listbox(contents, width = 42, height=50, bd=3, listvariable=self.englishList)
+        enList.pack(side=tk.LEFT, fill=tk.Y)
 
-trans = Button(topFrame, text="Translate ترجم", command=translate)
-trans.pack(side=LEFT, padx=4, pady = 1)
+        arList = tk.Listbox(contents, width = 42, height=50, bd=3, justify=tk.RIGHT, listvariable=self.arabicList)
+        arList.pack(side=tk.RIGHT, fill=tk.Y)
+        
+    def getDatabaseConnection(self):
+        try:
+            connect = sqlite3.connect('database.db3')
+            return connect
+        except sqlite3.Error as err:
+            print("Database Error: ", err.args[0])
+            return
+            
+    def translateWords(self):
+        results = []
+        english = ""
+        arabic = ""
+        try:
+            cursor = self.dbs.cursor()
+            cursor.execute("select distinct(english),arabic from trans where english='"+
+            self.wordTranslate.get().upper() +"' or arabic='"+
+            self.wordTranslate.get().upper() +"' ")
+            results = cursor.fetchall()
 
-about = Button(topFrame, text="About عن البرنامج", command=aboutApp)
-about.pack(side=LEFT, padx=4, pady = 1)
+            for row in results:
+                english += "\"" + row[0] + "\"\n"
+                arabic  += "\"" + row[1] + "\"\n"
+            
+            self.englishList.set(english)
+            self.arabicList.set(arabic)
+        except sqlite3.Error as err:
+            print("Database Error: ", err.args[0])
+            return
 
-exit = Button(topFrame, text="Exit خــروج", command=mainWindow.quit)
-exit.pack(side=LEFT, padx=4, pady = 1)
+root = tk.Tk()
+root.title("القامــــــــــــــــــوس")
+root.maxsize(550 , 300)
+root.minsize(550 , 300)
+root.resizable(False, False)
 
-""" --------------------------- """
-
-bottomFrame = Frame(mainWindow, bd=1, relief=GROOVE, padx=4, pady=4)
-bottomFrame.pack(side=BOTTOM, fill=BOTH)
-
-""" --------------------------- """
-enValues = StringVar()
-en = Listbox(bottomFrame, width = 48, height=50, bd=3, listvariable=enValues)
-en.pack(side=LEFT, fill=Y)
-
-arValues = StringVar()
-ar = Listbox(bottomFrame, width = 48, height=50, bd=3, justify=RIGHT, listvariable=arValues)
-ar.pack(side=RIGHT, fill=Y)
-
-""" --------------------------- """
-
-conn = connectDB()
-
-mainWindow.mainloop()
+app = Application(root)
+root.mainloop()
