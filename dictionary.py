@@ -1,3 +1,5 @@
+#!/usr/local/bin/python
+# coding: utf-8
 import tkinter as tk
 import tkinter.messagebox as mb
 import sqlite3
